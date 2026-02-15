@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remembe to come home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;700&display=swap');
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            font-family: 'Quicksand', sans-serif;
+            background: #E0F7FA;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hình ảnh Background ghép mảnh đa kích thước */
+        .bg-grid-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            /* Tạo lưới 6 cột cố định để dễ quản lý nhịp điệu hình ảnh */
+            grid-template-columns: repeat(6, 1fr);
+            grid-auto-rows: 150px;
+            gap: 5px;
+            opacity: 0.25;
+            z-index: 0;
+            padding: 5px;
+        }
+
+        .bg-grid-item {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+            filter: grayscale(10%);
+        }
+
+        /* Định nghĩa các kiểu kích cỡ khác nhau */
+        .span-2-2 { grid-column: span 2; grid-row: span 2; } /* Hình vuông lớn */
+        .span-2-1 { grid-column: span 2; grid-row: span 1; } /* Hình chữ nhật ngang */
+        .span-1-2 { grid-column: span 1; grid-row: span 2; } /* Hình chữ nhật đứng */
+        .span-1-1 { grid-column: span 1; grid-row: span 1; } /* Hình vuông nhỏ */
+
+        /* Hiệu ứng mây bay */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: moveClouds linear infinite;
+            z-index: 1;
+        }
+        .cloud::after, .cloud::before {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+        .cloud:nth-child(1) { width: 80px; height: 30px; top: 8%; left: -100px; animation-duration: 25s; }
+        .cloud:nth-child(2) { width: 120px; height: 40px; top: 12%; left: -150px; animation-duration: 35s; animation-delay: 5s; }
+
+        @keyframes moveClouds {
+            from { transform: translateX(-20vw); }
+            to { transform: translateX(120vw); }
+        }
+
+        /* Bãi cỏ */
+        .grass {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 20vh;
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            z-index: 3;
+        }
+
+        /* Khu vực trung tâm */
+        .center-stage {
+            position: relative;
+            margin-top: 120px;
+            z-index: 5;
+            text-align: center;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .main-photo-frame {
+            width: 45vw;
+            max-width: 180px;
+            height: 45vw;
+            max-height: 180px;
+            padding: 8px;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            transform: rotate(-2deg);
+            display: inline-block;
+            border: 1px solid #ddd;
+        }
+
+        .main-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .wish-bubble-main {
+            background: #fff;
+            padding: 8px 20px;
+            border-radius: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            color: #d81b60;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        /* Thành viên */
+        .members-container {
+            position: fixed;
+            bottom: 3vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            flex-wrap: wrap; 
+            gap: clamp(5px, 2vw, 20px);
+            padding: 0 10px;
+            z-index: 10;
+        }
+
+        .member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .char-head { font-size: clamp(1.5rem, 6vw, 2.2rem); z-index: 15; }
+
+        .char-body {
+            width: clamp(20px, 5vw, 28px);
+            height: clamp(30px, 8vw, 40px);
+            margin-top: -8px;
+            border-radius: 8px 8px 4px 4px;
+            position: relative;
+            z-index: 13;
+        }
+
+        .char-arm {
+            position: absolute;
+            width: 25%; height: 60%;
+            background-color: inherit;
+            top: 10%; border-radius: 4px;
+            animation: wave 2s ease-in-out infinite;
+        }
+        .arm-left { left: -30%; transform-origin: top right; }
+        .arm-right { right: -30%; transform-origin: top left; }
+
+        .char-leg {
+            position: absolute;
+            width: 30%; height: 30%;
+            bottom: -25%; background-color: #333; 
+            border-radius: 2px;
+        }
+        .leg-left { left: 10%; }
+        .leg-right { right: 10%; }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        .member-chat-bubble {
+            position: absolute;
+            top: -50px;
+            background: white;
+            padding: 3px 6px;
+            border-radius: 8px;
+            font-size: clamp(0.5rem, 2vw, 0.7rem);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            width: clamp(50px, 14vw, 75px);
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            animation: bounce 2.5s infinite;
+            z-index: 20;
+        }
+
+        .member-chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 50%; transform: translateX(-50%);
+            border-width: 5px 5px 0; border-style: solid; border-color: white transparent transparent;
+        }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .member-name {
+            color: white;
+            font-size: clamp(0.6rem, 2vw, 0.75rem);
+            margin-top: 10px; 
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+        }
+
+        #music-btn {
+            position: fixed;
+            top: 15px; right: 15px;
+            z-index: 100;
+            background: white;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .music-icon { font-size: 1.2rem; }
+        .rotating { animation: rotate 3s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .bg-grid-container { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 100px; }
+            .center-stage { margin-top: 100px; }
+            .members-container { gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background ghép ảnh đa kích thước -->
+    <div class="bg-grid-container" id="bg-grid">
+        <!-- Ảnh sẽ được thêm bằng JS -->
+    </div>
+
+    <!-- Music Button -->
+    <div id="music-btn" title="Phát nhạc">
+        <span class="music-icon">🎵</span>
+    </div>
+    <audio id="bg-music" loop>
+        <source src="./assets/music/LOI_THUONG.MP3" type="audio/mpeg">
+    </audio>
+
+    <div class="cloud"></div>
+    <div class="cloud"></div>
+
+    <div class="center-stage">
+        <div class="wish-bubble-main">
+            Vạn sự như ý! Vạn dặm bình an! ✨
+        </div>
+        <br>
+        <div class="main-photo-frame">
+            <img src="./assets/img/LE_DUC_DUY.jpg" alt="Nhân vật chính" class="main-photo">
+        </div>
+    </div>
+
+    <div class="members-container" id="members">
+        <!-- Render từ JS -->
+    </div>
+
+    <div class="grass"></div>
+
+    <script>
+        const bgImages = [
+            './assets/img/background/1.jpg',
+            './assets/img/background/2.jpg',
+            './assets/img/background/3.jpg',
+            './assets/img/background/6.jpg',
+            './assets/img/background/4.jpg',
+            './assets/img/background/5.jpg',
+        ];
+
+        const gridContainer = document.getElementById('bg-grid');
+        // Các lớp CSS để tạo sự đa dạng kích thước
+        const sizeClasses = ['span-1-1', 'span-2-1', 'span-1-2', 'span-2-2', 'span-1-1', 'span-2-1'];
+
+        // Lấp đầy grid bằng các ảnh ngẫu nhiên kích thước
+        for (let i = 0; i < 20; i++) {
+            const img = document.createElement('img');
+            img.src = bgImages[i % bgImages.length] + '?auto=format&fit=crop&w=500&q=60';
+            // Chọn ngẫu nhiên hoặc lặp lại kích thước
+            const sizeClass = sizeClasses[i % sizeClasses.length];
+            img.className = `bg-grid-item ${sizeClass}`;
+            gridContainer.appendChild(img);
+        }
+
+        const musicBtn = document.getElementById('music-btn');
+        const bgMusic = document.getElementById('bg-music');
+        const musicIcon = musicBtn.querySelector('.music-icon');
+        let isPlaying = false;
+
+        musicBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicIcon.classList.remove('rotating');
+                musicIcon.textContent = '🎵';
+            } else {
+                bgMusic.play();
+                musicIcon.classList.add('rotating');
+                musicIcon.textContent = '🎶';
+            }
+            isPlaying = !isPlaying;
+        });
+
+        const membersData = [
+            { gender: 'nam', head: '👦', name: 'An', wish: 'Hạnh phúc', color: '#FF5733' },
+            { gender: 'nu', head: '👧', name: 'Bình', wish: 'Bình an', color: '#FF33A1' },
+            { gender: 'nam', head: '👨', name: 'Cường', wish: 'Sức khỏe', color: '#33FF57' },
+            { gender: 'nu', head: '👩', name: 'Dung', wish: 'Vui vẻ', color: '#3357FF' },
+            { gender: 'nam', head: '🧑', name: 'Hải', wish: 'Thành công', color: '#F3FF33' },
+            { gender: 'nu', head: '👱‍♀️', name: 'Lan', wish: 'May mắn', color: '#FF8C33' },
+            { gender: 'nam', head: '🧔', name: 'Minh', wish: 'Tài lộc', color: '#33FFF3' },
+            { gender: 'nu', head: '👩‍🦰', name: 'Ngọc', wish: 'Xinh đẹp', color: '#8D33FF' },
+            { gender: 'nam', head: '👨‍🦱', name: 'Quân', wish: 'Trí tuệ', color: '#FF3333' },
+            { gender: 'nu', head: '👧', name: 'Thảo', wish: 'Mỉm cười', color: '#33FF8D' }
+        ];
+
+        const container = document.getElementById('members');
+
+        membersData.forEach((m, idx) => {
+            const div = document.createElement('div');
+            div.className = 'member';
+            div.innerHTML = `
+                <div class="member-chat-bubble" style="animation-delay: ${idx * 0.2}s">${m.wish}</div>
+                <div class="char-head">${m.head}</div>
+                <div class="char-body" style="background-color: ${m.color}">
+                    <div class="char-arm arm-left"></div>
+                    <div class="char-arm arm-right"></div>
+                    <div class="char-leg leg-left"></div>
+                    <div class="char-leg leg-right"></div>
+                </div>
+                <span class="member-name">${m.name}</span>
+            `;
+            container.appendChild(div);
+        });
+    </script>
+</body>
+</html>
