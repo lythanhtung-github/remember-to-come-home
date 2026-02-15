@@ -3,66 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remembe to come home</title>
+    <title>Remember to come home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;700&display=swap');
 
         body {
             margin: 0;
-            overflow-x: hidden;
+            padding: 0;
+            overflow: hidden; /* Ngăn chặn cuộn toàn bộ body */
             font-family: 'Quicksand', sans-serif;
             background: #E0F7FA;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            height: 100vh;
         }
 
-        /* Hình ảnh Background ghép mảnh đa kích thước */
-        .bg-grid-container {
-            position: fixed;
+        /* PHẦN CUỘN ẢNH NỀN */
+        .scrollable-bg-container {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: grid;
-            /* Tạo lưới 6 cột cố định để dễ quản lý nhịp điệu hình ảnh */
-            grid-template-columns: repeat(6, 1fr);
-            grid-auto-rows: 150px;
-            gap: 5px;
-            opacity: 0.25;
+            overflow-y: auto; 
             z-index: 0;
-            padding: 5px;
+        }
+
+        .bg-grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            grid-auto-rows: 120px; /* Chiều cao thấp hơn để tạo hình chữ nhật nằm ngang rõ rệt */
+            gap: 15px;
+            opacity: 0.3; 
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        @media (min-width: 768px) {
+            .bg-grid-container { 
+                grid-template-columns: repeat(4, 1fr); 
+                grid-auto-rows: 180px;
+            }
         }
 
         .bg-grid-item {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 4px;
-            filter: grayscale(10%);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 2px solid rgba(255,255,255,0.5);
         }
 
-        /* Định nghĩa các kiểu kích cỡ khác nhau */
-        .span-2-2 { grid-column: span 2; grid-row: span 2; } /* Hình vuông lớn */
-        .span-2-1 { grid-column: span 2; grid-row: span 1; } /* Hình chữ nhật ngang */
-        .span-1-2 { grid-column: span 1; grid-row: span 2; } /* Hình chữ nhật đứng */
-        .span-1-1 { grid-column: span 1; grid-row: span 1; } /* Hình vuông nhỏ */
+        /* GIAO DIỆN CỐ ĐỊNH PHÍA TRÊN */
+        .fixed-ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; 
+            z-index: 10;
+        }
 
-        /* Hiệu ứng mây bay */
+        .fixed-ui-overlay button, 
+        .fixed-ui-overlay .members-slider-wrapper,
+        .fixed-ui-overlay #music-btn,
+        .fixed-ui-overlay .member-chat-bubble,
+        .fixed-ui-overlay #top-message-display {
+            pointer-events: auto;
+        }
+
+        /* Clouds */
         .cloud {
-            position: absolute;
+            position: fixed; 
             background: white;
             border-radius: 50px;
             opacity: 0.8;
             animation: moveClouds linear infinite;
             z-index: 1;
-        }
-        .cloud::after, .cloud::before {
-            content: '';
-            position: absolute;
-            background: white;
-            border-radius: 50%;
         }
         .cloud:nth-child(1) { width: 80px; height: 30px; top: 8%; left: -100px; animation-duration: 25s; }
         .cloud:nth-child(2) { width: 120px; height: 40px; top: 12%; left: -150px; animation-duration: 35s; animation-delay: 5s; }
@@ -72,31 +90,54 @@
             to { transform: translateX(120vw); }
         }
 
-        /* Bãi cỏ */
+        /* Top Message Display */
+        #top-message-display {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            z-index: 3000;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.3rem;
+            color: #0084ff; /* Màu cam cho thông báo trên cùng */
+            text-align: center;
+            max-width: 90%;
+            width: 500px;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid #fff3e0;
+        }
+
+        #top-message-display.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Grass */
         .grass {
             position: fixed;
             bottom: 0;
             width: 100%;
-            height: 20vh;
+            height: 25vh;
             background: linear-gradient(to bottom, #4CAF50, #2E7D32);
-            z-index: 3;
+            z-index: 2;
         }
 
-        /* Khu vực trung tâm */
+        /* Center Stage */
         .center-stage {
             position: relative;
-            margin-top: 120px;
+            padding-top: 100px;
             z-index: 5;
             text-align: center;
-            padding: 20px;
-            flex-grow: 1;
+            pointer-events: none;
         }
 
+        /* KHUNG ẢNH NHÂN VẬT CHÍNH (HÌNH VUÔNG) */
         .main-photo-frame {
-            width: 45vw;
-            max-width: 180px;
-            height: 45vw;
-            max-height: 180px;
+            width: 150px; 
+            height: 150px; 
             padding: 8px;
             background: white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
@@ -113,15 +154,16 @@
             border-radius: 4px;
         }
 
+        /* CHỮ VẠN SỰ NHƯ Ý MÀU CAM */
         .wish-bubble-main {
             background: #fff;
-            padding: 8px 20px;
+            padding: 10px 25px;
             border-radius: 25px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             font-family: 'Dancing Script', cursive;
-            font-size: clamp(1.2rem, 5vw, 1.8rem);
-            color: #d81b60;
-            margin-bottom: 15px;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            color: #ff6d00; /* Đổi sang màu cam */
+            margin-bottom: 20px;
             display: inline-block;
             animation: float 4s ease-in-out infinite;
         }
@@ -131,99 +173,162 @@
             50% { transform: translateY(-10px) rotate(1deg); }
         }
 
-        /* Thành viên */
-        .members-container {
+        /* Members Slider System */
+        .members-slider-wrapper {
             position: fixed;
-            bottom: 3vh;
+            bottom: 6vh;
+            left: 0;
             width: 100%;
+            z-index: 100;
             display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: flex-end;
-            flex-wrap: wrap; 
-            gap: clamp(5px, 2vw, 20px);
-            padding: 0 10px;
-            z-index: 10;
+            padding: 0 50px;
+        }
+
+        .members-viewport {
+            width: 100%;
+            max-width: 1200px; 
+            overflow: visible; 
+            position: relative;
+        }
+
+        .members-track {
+            display: flex;
+            transition: transform 0.5s ease-out;
+            gap: 12px; 
+            padding: 10px 0;
         }
 
         .member {
+            flex: 0 0 calc(16.66% - 0px); 
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
+            min-width: 60px; 
         }
 
-        .char-head { font-size: clamp(1.5rem, 6vw, 2.2rem); z-index: 15; }
-
-        .char-body {
-            width: clamp(20px, 5vw, 28px);
-            height: clamp(30px, 8vw, 40px);
-            margin-top: -8px;
-            border-radius: 8px 8px 4px 4px;
-            position: relative;
-            z-index: 13;
+        @media (max-width: 1024px) {
+            .member { flex: 0 0 calc(20% - 10px); }
         }
-
-        .char-arm {
-            position: absolute;
-            width: 25%; height: 60%;
-            background-color: inherit;
-            top: 10%; border-radius: 4px;
-            animation: wave 2s ease-in-out infinite;
+        @media (max-width: 768px) {
+            .member { flex: 0 0 calc(33.33% - 10px); }
         }
-        .arm-left { left: -30%; transform-origin: top right; }
-        .arm-right { right: -30%; transform-origin: top left; }
-
-        .char-leg {
-            position: absolute;
-            width: 30%; height: 30%;
-            bottom: -25%; background-color: #333; 
-            border-radius: 2px;
-        }
-        .leg-left { left: 10%; }
-        .leg-right { right: 10%; }
-
-        @keyframes wave {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(15deg); }
+        @media (max-width: 480px) {
+            .member { flex: 0 0 calc(50% - 8px); }
+            .members-slider-wrapper { padding: 0 30px; }
         }
 
         .member-chat-bubble {
             position: absolute;
-            top: -50px;
+            bottom: 105%; 
+            left: 50%;
+            transform: translateX(-50%);
             background: white;
-            padding: 3px 6px;
-            border-radius: 8px;
-            font-size: clamp(0.5rem, 2vw, 0.7rem);
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-            width: clamp(50px, 14vw, 75px);
-            text-align: center;
-            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 10.5px;
+            line-height: 1.3;
             color: #333;
-            animation: bounce 2.5s infinite;
-            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            width: 100px; 
+            text-align: center;
+            animation: bounce 3s infinite;
+            z-index: 110;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
         }
 
         .member-chat-bubble::after {
             content: '';
             position: absolute;
-            bottom: -5px; left: 50%; transform: translateX(-50%);
-            border-width: 5px 5px 0; border-style: solid; border-color: white transparent transparent;
+            bottom: -9px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 9px solid white;
         }
 
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .member-chat-bubble:hover {
+            background: #fff8f1;
+            transform: translateX(-50%) scale(1.15);
+            z-index: 120;
+            -webkit-line-clamp: unset;
+            overflow: visible;
+            width: 140px; 
+        }
+        
+        .char-head { font-size: 2rem; z-index: 105; cursor: default; margin-bottom: -4px; }
+        .char-body {
+            width: 22px;
+            height: 32px;
+            margin-top: -5px;
+            border-radius: 6px 6px 4px 4px;
+            position: relative;
+            z-index: 104;
+        }
+        .char-arm {
+            position: absolute;
+            width: 5px; height: 16px;
+            background-color: inherit;
+            top: 10%; border-radius: 3px;
+            animation: wave 2s ease-in-out infinite;
+        }
+        .arm-left { left: -7px; transform-origin: top right; }
+        .arm-right { right: -7px; transform-origin: top left; }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(20deg); }
+        }
+
+        @keyframes bounce { 
+            0%, 100% { transform: translate(-50%, 0); } 
+            50% { transform: translate(-50%, -5px); } 
+        }
 
         .member-name {
             color: white;
-            font-size: clamp(0.6rem, 2vw, 0.75rem);
+            font-size: 11px;
             margin-top: 10px; 
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+            font-weight: 700;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
+            white-space: nowrap;
         }
+
+        .nav-btn {
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            position: absolute;
+            z-index: 150;
+        }
+        .nav-btn:hover:not(:disabled) { background: #ff6d00; color: white; transform: scale(1.1); }
+        .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+        
+        #prev-btn { left: 5px; }
+        #next-btn { right: 5px; }
 
         #music-btn {
             position: fixed;
             top: 15px; right: 15px;
-            z-index: 100;
+            z-index: 3000;
             background: white;
             width: 40px; height: 40px;
             border-radius: 50%;
@@ -232,75 +337,152 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        .music-icon { font-size: 1.2rem; }
         .rotating { animation: rotate 3s linear infinite; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        @media (max-width: 480px) {
-            .bg-grid-container { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 100px; }
-            .center-stage { margin-top: 100px; }
-            .members-container { gap: 6px; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- Background ghép ảnh đa kích thước -->
-    <div class="bg-grid-container" id="bg-grid">
-        <!-- Ảnh sẽ được thêm bằng JS -->
+    <div id="top-message-display"></div>
+
+    <!-- PHẦN NỀN CUỘN -->
+    <div class="scrollable-bg-container">
+        <div class="bg-grid-container" id="bg-grid"></div>
+        <div style="height: 300px;"></div>
     </div>
 
-    <!-- Music Button -->
-    <div id="music-btn" title="Phát nhạc">
-        <span class="music-icon">🎵</span>
-    </div>
-    <audio id="bg-music" loop>
-        <source src="./assets/music/LOI_THUONG.MP3" type="audio/mpeg">
-    </audio>
-
-    <div class="cloud"></div>
-    <div class="cloud"></div>
-
-    <div class="center-stage">
-        <div class="wish-bubble-main">
-            Vạn sự như ý! Vạn dặm bình an! ✨
+    <!-- GIAO DIỆN CỐ ĐỊNH -->
+    <div class="fixed-ui-overlay">
+        <div id="music-btn" title="Phát nhạc">
+            <span class="music-icon">🎵</span>
         </div>
-        <br>
-        <div class="main-photo-frame">
-            <img src="./assets/img/LE_DUC_DUY.jpg" alt="Nhân vật chính" class="main-photo">
+        <audio id="bg-music" loop>
+            <source src="./assets/music/LOI_THUONG.MP3" type="audio/mpeg">
+        </audio>
+
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+
+        <div class="center-stage">
+            <div class="wish-bubble-main">
+                Vạn sự như ý! Vạn dặm bình an! <br>
+                Đi thật xa để trở về ✨
+            </div>
+            <br>
+            <div class="main-photo-frame">
+                <img src="./assets/img/LE_DUC_DUY.jpg" alt="Nhân vật chính" class="main-photo">
+            </div>
+        </div>
+
+        <div class="grass"></div>
+
+        <div class="members-slider-wrapper">
+            <button id="prev-btn" class="nav-btn">❮</button>
+            <div class="members-viewport">
+                <div class="members-track" id="members-track"></div>
+            </div>
+            <button id="next-btn" class="nav-btn">❯</button>
         </div>
     </div>
-
-    <div class="members-container" id="members">
-        <!-- Render từ JS -->
-    </div>
-
-    <div class="grass"></div>
 
     <script>
-        const bgImages = [
-            './assets/img/background/1.jpg',
-            './assets/img/background/2.jpg',
-            './assets/img/background/3.jpg',
-            './assets/img/background/6.jpg',
-            './assets/img/background/4.jpg',
-            './assets/img/background/5.jpg',
+        const membersData = [
+            { head: '👦', name: 'Bích Tiên', wish: 'Chúc anh lên đường bình an, công việc thuận lợi nhé!', color: '#FF5733' },
+            { head: '👧', name: 'Bảo Trân', wish: 'Bình an vô sự, sớm trở về thăm mọi người nha.', color: '#FF33A1' },
+            { head: '👨', name: 'Văn Quang', wish: 'Mạnh giỏi nha đồng chí! Cố gắng thành công rực rỡ.', color: '#33FF57' },
+            { head: '👩', name: 'Trần Hà', wish: 'Luôn vui vẻ và giữ vững niềm tin vào bản thân.', color: '#3357FF' },
+            { head: '🧔', name: 'Hoàng Đức', wish: 'Chào anh Đức Duy, anh hãy thật vững tâm trên con đường mới nhé.', color: '#33FFF3' },
+            { head: '👧', name: 'Dạ Thảo', wish: 'Mỉm cười mỗi ngày, mọi khó khăn rồi sẽ qua đi.', color: '#33FF8D' },
+            { head: '🧑', name: 'Nhật Uyên', wish: 'Thượng lộ bình an! Giữ gìn sức khỏe thật tốt nhé.', color: '#FFC300' },
+            { head: '👩‍🦱', name: 'Tbh', wish: 'Hãy luôn là chính mình và tỏa sáng ở nơi mới nhé!', color: '#900C3F' },
+            { head: '👨‍🦰', name: 'Mỹ Chân', wish: 'Chúc mọi điều tốt đẹp nhất sẽ đến với bạn.', color: '#581845' },
+            { head: '👱‍♀️', name: '...', wish: 'Đi xa để trưởng thành hơn, mong bạn hạnh phúc.', color: '#DAF7A6' }
         ];
 
-        const gridContainer = document.getElementById('bg-grid');
-        // Các lớp CSS để tạo sự đa dạng kích thước
-        const sizeClasses = ['span-1-1', 'span-2-1', 'span-1-2', 'span-2-2', 'span-1-1', 'span-2-1'];
+        // Ảnh ngang (400x300) cho lưới nền
+        const backgroundImages = [
+            "./assets/img/background/1.jpg",
+            "./assets/img/background/2.jpg",
+            "./assets/img/background/3.jpg",
+            "./assets/img/background/4.jpg",
+            "./assets/img/background/5.jpg",
+            "./assets/img/background/6.jpg",
+            "./assets/img/background/7.jpg",
+            "./assets/img/background/8.jpg",
+            "./assets/img/background/9.jpg",
+            "./assets/img/background/10.jpg",
+            "./assets/img/background/11.jpg",
+            "./assets/img/background/12.jpg",
+            "./assets/img/background/13.jpg",
+            "./assets/img/background/14.jpg",
+            "./assets/img/background/15.jpg",
+            "./assets/img/background/16.jpg",
+            "./assets/img/background/17.jpg",
+            "./assets/img/background/18.jpg",
+            "./assets/img/background/19.jpg",
+            "./assets/img/background/20.jpg",
+        ];
 
-        // Lấp đầy grid bằng các ảnh ngẫu nhiên kích thước
-        for (let i = 0; i < 20; i++) {
-            const img = document.createElement('img');
-            img.src = bgImages[i % bgImages.length] + '?auto=format&fit=crop&w=500&q=60';
-            // Chọn ngẫu nhiên hoặc lặp lại kích thước
-            const sizeClass = sizeClasses[i % sizeClasses.length];
-            img.className = `bg-grid-item ${sizeClass}`;
-            gridContainer.appendChild(img);
+        const track = document.getElementById('members-track');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const topDisplay = document.getElementById('top-message-display');
+        let currentPosition = 0;
+        let hideTimeout;
+
+        function showMessage(fullText) {
+            clearTimeout(hideTimeout);
+            topDisplay.textContent = fullText;
+            topDisplay.classList.add('show');
+            hideTimeout = setTimeout(() => { topDisplay.classList.remove('show'); }, 6000);
         }
 
+        // Render Members
+        membersData.forEach((m, idx) => {
+            const div = document.createElement('div');
+            div.className = 'member';
+            div.innerHTML = `
+                <div class="member-chat-bubble" style="animation-delay: ${idx * 0.15}s" 
+                     onclick="showMessage('${m.name}: ${m.wish.replace(/'/g, "\\'")}')">
+                    ${m.wish}
+                </div>
+                <div class="char-head">${m.head}</div>
+                <div class="char-body" style="background-color: ${m.color}">
+                    <div class="char-arm arm-left"></div>
+                    <div class="char-arm arm-right"></div>
+                    <div class="char-leg" style="left:2px; bottom:-8px; background:#333; width:6px; height:10px; position:absolute;"></div>
+                    <div class="char-leg" style="right:2px; bottom:-8px; background:#333; width:6px; height:10px; position:absolute;"></div>
+                </div>
+                <span class="member-name">${m.name}</span>
+            `;
+            track.appendChild(div);
+        });
+
+        // Slider Logic
+        function updateSlider() {
+            const viewportWidth = track.parentElement.offsetWidth;
+            const maxScroll = track.scrollWidth - viewportWidth;
+            if (currentPosition < 0) currentPosition = 0;
+            if (currentPosition > maxScroll) currentPosition = maxScroll;
+            track.style.transform = `translateX(-${currentPosition}px)`;
+            prevBtn.disabled = currentPosition <= 0;
+            nextBtn.disabled = currentPosition >= maxScroll - 5;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentPosition += track.parentElement.offsetWidth * 0.6;
+            updateSlider();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentPosition -= track.parentElement.offsetWidth * 0.6;
+            updateSlider();
+        });
+
+        window.addEventListener('load', updateSlider);
+        window.addEventListener('resize', updateSlider);
+
+        // Music Logic
         const musicBtn = document.getElementById('music-btn');
         const bgMusic = document.getElementById('bg-music');
         const musicIcon = musicBtn.querySelector('.music-icon');
@@ -312,43 +494,30 @@
                 musicIcon.classList.remove('rotating');
                 musicIcon.textContent = '🎵';
             } else {
-                bgMusic.play();
+                bgMusic.play().catch(() => {});
                 musicIcon.classList.add('rotating');
                 musicIcon.textContent = '🎶';
             }
             isPlaying = !isPlaying;
         });
 
-        const membersData = [
-            { gender: 'nam', head: '👦', name: 'An', wish: 'Hạnh phúc', color: '#FF5733' },
-            { gender: 'nu', head: '👧', name: 'Bình', wish: 'Bình an', color: '#FF33A1' },
-            { gender: 'nam', head: '👨', name: 'Cường', wish: 'Sức khỏe', color: '#33FF57' },
-            { gender: 'nu', head: '👩', name: 'Dung', wish: 'Vui vẻ', color: '#3357FF' },
-            { gender: 'nam', head: '🧑', name: 'Hải', wish: 'Thành công', color: '#F3FF33' },
-            { gender: 'nu', head: '👱‍♀️', name: 'Lan', wish: 'May mắn', color: '#FF8C33' },
-            { gender: 'nam', head: '🧔', name: 'Minh', wish: 'Tài lộc', color: '#33FFF3' },
-            { gender: 'nu', head: '👩‍🦰', name: 'Ngọc', wish: 'Xinh đẹp', color: '#8D33FF' },
-            { gender: 'nam', head: '👨‍🦱', name: 'Quân', wish: 'Trí tuệ', color: '#FF3333' },
-            { gender: 'nu', head: '👧', name: 'Thảo', wish: 'Mỉm cười', color: '#33FF8D' }
-        ];
+        // Grid Render (Ảnh ngang)
+        const gridContainer = document.getElementById('bg-grid');
+        backgroundImages.forEach(src => {
+            const img = document.createElement('img');
+            img.className = 'bg-grid-item';
+            img.src = src;
+            img.onerror = function() {
+                this.style.background = `hsl(${Math.random() * 360}, 40%, 85%)`;
+                this.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            };
+            gridContainer.appendChild(img);
+        });
 
-        const container = document.getElementById('members');
-
-        membersData.forEach((m, idx) => {
-            const div = document.createElement('div');
-            div.className = 'member';
-            div.innerHTML = `
-                <div class="member-chat-bubble" style="animation-delay: ${idx * 0.2}s">${m.wish}</div>
-                <div class="char-head">${m.head}</div>
-                <div class="char-body" style="background-color: ${m.color}">
-                    <div class="char-arm arm-left"></div>
-                    <div class="char-arm arm-right"></div>
-                    <div class="char-leg leg-left"></div>
-                    <div class="char-leg leg-right"></div>
-                </div>
-                <span class="member-name">${m.name}</span>
-            `;
-            container.appendChild(div);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.member-chat-bubble') && !e.target.closest('#top-message-display') && !e.target.closest('.nav-btn')) {
+                topDisplay.classList.remove('show');
+            }
         });
     </script>
 </body>
